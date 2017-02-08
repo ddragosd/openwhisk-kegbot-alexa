@@ -201,12 +201,18 @@ Alexa = (function () {
                 'Accept': 'application/json'
             }
         };
+        console.log("handleVolume request");
+        console.log(req_options);
+
         request( req_options, function (err, resp, body) {
+            console.log("handleVolume: request handler");
+
             if ( err ) {
                 console.log( err );
                 response.tell('unable to connect to the Keg Bot API');
                 return;
             }
+
             var obj = JSON.parse(body);
             var keg = obj.objects[0].current_keg;
             if ( keg ) {
