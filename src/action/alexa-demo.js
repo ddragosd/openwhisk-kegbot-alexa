@@ -153,7 +153,9 @@ Alexa = (function () {
         },
 
         "Volume": function (intent, session, response) {
-            return handleVolume(intent, session, response);
+            handleVolume(intent, session, response, function (resp) {
+                return resp;
+            });
         }
     };
 
@@ -192,7 +194,7 @@ Alexa = (function () {
         });
     }
 
-    function handleVolume(intent, session, response) {
+    function handleVolume(intent, session, response, callback) {
         var that = this;
         var req_options = {
             url: session.kb_config.kb_url + '/api/taps/',
@@ -208,7 +210,7 @@ Alexa = (function () {
             .on('error', function (err) {
                 if (err) {
                     console.log(err);
-                    response.tell('unable to connect to the Keg Bot API');
+                    callback(response.tell('unable to connect to the Keg Bot API'));
                     return;
                 }
             });
@@ -217,9 +219,9 @@ Alexa = (function () {
             var obj = JSON.parse(body);
             var keg = obj.objects[0].current_keg;
             if (keg) {
-                response.tell('Kegbot has ' + keg.percent_full.toPrecision(2) + ' percent of the ' + keg.type.name + ' keg left');
+                callback(response.tell('Kegbot has ' + keg.percent_full.toPrecision(2) + ' percent of the ' + keg.type.name + ' keg left'));
             } else {
-                response.tell('Kegbot has no beer on tap');
+                callback(response.tell('Kegbot has no beer on tap'));
             }
         });
         console.log("handleVolume done.");
