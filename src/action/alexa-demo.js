@@ -176,15 +176,15 @@ Alexa = (function () {
         };
 
         request(req_options, function (err, resp, body) {
-            if ( err ) {
-                console.log( err );
+            if (err) {
+                console.log(err);
                 response.tell('unable to connect to the Keg Bot API');
                 return;
             }
 
             var obj = JSON.parse(body);
             var keg = obj.objects[0].current_keg;
-            if ( keg ) {
+            if (keg) {
                 response.tell('Kegbot has ' + keg.type.name + ' on tap');
             } else {
                 response.tell('Kegbot has no beer on tap');
@@ -204,23 +204,25 @@ Alexa = (function () {
         console.log("handleVolume request");
         console.log(req_options);
 
-        request( req_options, function (err, resp, body) {
-            console.log("handleVolume: request handler");
-
-            if ( err ) {
-                console.log( err );
-                response.tell('unable to connect to the Keg Bot API');
-                return;
-            }
-
+        var r = request(req_options)
+            .on('error', function (err) {
+                if (err) {
+                    console.log(err);
+                    response.tell('unable to connect to the Keg Bot API');
+                    return;
+                }
+            });
+        r.on('complete', function (resp, body) {
+            console.log("handleVolume: request complete handler");
             var obj = JSON.parse(body);
             var keg = obj.objects[0].current_keg;
-            if ( keg ) {
+            if (keg) {
                 response.tell('Kegbot has ' + keg.percent_full.toPrecision(2) + ' percent of the ' + keg.type.name + ' keg left');
             } else {
                 response.tell('Kegbot has no beer on tap');
             }
         });
+        console.log("handleVolume done.");
     }
 
 
@@ -260,7 +262,7 @@ function main(event) {
 
     var alexa = new Alexa();
     alexa.kb_config = {
-        kb_url : event.kb_url,
+        kb_url: event.kb_url,
         kb_apikey: event.kb_apikey
     }
     return alexa.handleEvent(event);
