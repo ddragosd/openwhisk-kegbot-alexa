@@ -248,6 +248,7 @@ Alexa = (function () {
 
 function main(event) {
     console.log('ALEXA Event', event.request.type + '!');
+    console.log(event);
 
     var alexa = new Alexa();
     alexa.kb_config = {
