@@ -1,0 +1,16 @@
+package:
+  name: alexa-kegbot-skill
+  version: 1.0
+  license: Apache-2.0
+  actions:
+    kegbot-alexa-action:
+      version: 1.0
+      location: src/action/alexa-demo.js
+      runtime: nodejs@6
+      inputs:
+        kb_url:
+          type: String
+          description: The URL to the Kegbot
+        kb_apikey:
+          type: String
+          description: The API KEY to be used with the Kegbot API
