@@ -252,7 +252,7 @@ function main(event) {
     var alexa = new Alexa();
     alexa.kb_config = {
         kb_url : event.kb_url,
-        kb_apikey: event:kb_apikey
+        kb_apikey: event.kb_apikey
     }
     return alexa.handleEvent(event);
 }
