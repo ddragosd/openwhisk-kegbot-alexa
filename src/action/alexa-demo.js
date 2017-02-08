@@ -119,7 +119,7 @@ Alexa = (function () {
         this.handleLaunchRequest = bind(this.handleLaunchRequest, this);
     }
 
-    Alexa.prototype.kb_config = {}
+    Alexa.prototype.kb_config = {};
 
     Alexa.prototype.handleLaunchRequest = function (event) {
         var alexaResponse = new AlexaResponse();
@@ -133,6 +133,8 @@ Alexa = (function () {
         if (this.intentHandlers[intent] === null || typeof(this.intentHandlers[intent]) === "undefined") {
             intent = "AMAZON.HelpIntent";
         }
+        event.session = event.session || {};
+        event.session.kb_config = this.kb_config;
         // default
         return this.intentHandlers[intent](event.request.intent, event.session, alexaResponse);
     }
@@ -166,14 +168,14 @@ Alexa = (function () {
     function handleOnTap(intent, session, response) {
         var that = this;
         var req_options = {
-            url: this.kb_config.kb_url + '/api/taps/',
+            url: session.kb_config.kb_url + '/api/taps/',
             headers: {
                 'User-Agent': 'openwhisk-kegbot-alexa',
                 'Accept': 'application/json'
             }
         };
 
-        request(req_options, function (err, response, body) {
+        request(req_options, function (err, resp, body) {
             if ( err ) {
                 console.log( err );
                 response.tell('unable to connect to the Keg Bot API');
@@ -193,13 +195,13 @@ Alexa = (function () {
     function handleVolume(intent, session, response) {
         var that = this;
         var req_options = {
-            url: this.kb_config.kb_url + '/api/taps/',
+            url: session.kb_config.kb_url + '/api/taps/',
             headers: {
                 'User-Agent': 'openwhisk-kegbot-alexa',
                 'Accept': 'application/json'
             }
         };
-        request( req_options, function (err, response, body) {
+        request( req_options, function (err, resp, body) {
             if ( err ) {
                 console.log( err );
                 response.tell('unable to connect to the Keg Bot API');
