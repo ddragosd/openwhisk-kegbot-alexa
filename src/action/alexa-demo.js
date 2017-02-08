@@ -153,9 +153,7 @@ Alexa = (function () {
         },
 
         "Volume": function (intent, session, response) {
-            handleVolume(intent, session, response, function (resp) {
-                return resp;
-            });
+            handleVolume(intent, session, response);
         }
     };
 
@@ -194,37 +192,40 @@ Alexa = (function () {
         });
     }
 
-    function handleVolume(intent, session, response, callback) {
-        var that = this;
-        var req_options = {
-            url: session.kb_config.kb_url + '/api/taps/',
-            headers: {
-                'User-Agent': 'openwhisk-kegbot-alexa',
-                'Accept': 'application/json'
-            }
-        };
-        console.log("handleVolume request");
-        console.log(req_options);
+    function handleVolume(intent, session, response) {
+        return new Promise(function (resolve, reject) {
+            var that = this;
+            var req_options = {
+                url: session.kb_config.kb_url + '/api/taps/',
+                headers: {
+                    'User-Agent': 'openwhisk-kegbot-alexa',
+                    'Accept': 'application/json'
+                }
+            };
+            console.log("handleVolume request");
+            console.log(req_options);
 
-        var r = request(req_options)
-            .on('error', function (err) {
-                if (err) {
-                    console.log(err);
-                    callback(response.tell('unable to connect to the Keg Bot API'));
-                    return;
+            var r = request(req_options)
+                .on('error', function (err) {
+                    if (err) {
+                        console.log(err);
+                        resolve(response.tell('unable to connect to the Keg Bot API'));
+                        return;
+                    }
+                });
+            r.on('complete', function (resp, body) {
+                console.log("handleVolume: request complete handler");
+                var obj = JSON.parse(body);
+                var keg = obj.objects[0].current_keg;
+                if (keg) {
+                    resolve(response.tell('Kegbot has ' + keg.percent_full.toPrecision(2) + ' percent of the ' + keg.type.name + ' keg left'));
+                } else {
+                    resolve(response.tell('Kegbot has no beer on tap'));
                 }
             });
-        r.on('complete', function (resp, body) {
-            console.log("handleVolume: request complete handler");
-            var obj = JSON.parse(body);
-            var keg = obj.objects[0].current_keg;
-            if (keg) {
-                callback(response.tell('Kegbot has ' + keg.percent_full.toPrecision(2) + ' percent of the ' + keg.type.name + ' keg left'));
-            } else {
-                callback(response.tell('Kegbot has no beer on tap'));
-            }
+            console.log("handleVolume done.");
         });
-        console.log("handleVolume done.");
+
     }
 
 
@@ -245,14 +246,16 @@ Alexa = (function () {
     }
 
     Alexa.prototype.handleEvent = function (event) {
-        // differentiate request type: LaunchRequest vs IntentRequest
-        var req_type = event.request["type"] || "LaunchRequest";
+        return new Promise(function (resolve, reject) {
+            // differentiate request type: LaunchRequest vs IntentRequest
+            var req_type = event.request["type"] || "LaunchRequest";
 
-        if (req_type == "LaunchRequest") {
-            return this.handleLaunchRequest(event);
-        }
+            if (req_type == "LaunchRequest") {
+                return this.handleLaunchRequest(event);
+            }
 
-        return this.handleIntentRequest(event);
+            resolve(this.handleIntentRequest(event));
+        });
     };
 
     return Alexa;
