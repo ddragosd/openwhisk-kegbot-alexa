@@ -194,7 +194,6 @@ Alexa = (function () {
 
     function handleVolume(intent, session, response) {
         return new Promise(function (resolve, reject) {
-            var that = this;
             var req_options = {
                 url: session.kb_config.kb_url + '/api/taps/',
                 headers: {
@@ -204,6 +203,8 @@ Alexa = (function () {
             };
             console.log("handleVolume request");
             console.log(req_options);
+            console.log("session info:");
+            console.log(session);
 
             var r = request(req_options)
                 .on('error', function (err) {
@@ -246,16 +247,14 @@ Alexa = (function () {
     }
 
     Alexa.prototype.handleEvent = function (event) {
-        return new Promise(function (resolve, reject) {
-            // differentiate request type: LaunchRequest vs IntentRequest
-            var req_type = event.request["type"] || "LaunchRequest";
+        // differentiate request type: LaunchRequest vs IntentRequest
+        var req_type = event.request["type"] || "LaunchRequest";
 
-            if (req_type == "LaunchRequest") {
-                return this.handleLaunchRequest(event);
-            }
+        if (req_type == "LaunchRequest") {
+            return this.handleLaunchRequest(event);
+        }
 
-            resolve(this.handleIntentRequest(event));
-        });
+        return this.handleIntentRequest(event);
     };
 
     return Alexa;
